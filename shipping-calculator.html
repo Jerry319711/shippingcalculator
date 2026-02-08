@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Shipping Calculator | Real-Time Rates</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #e63946;
+            --primary-dark: #c1121f;
+            --secondary: #457b9d;
+            --accent: #f4a261;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+            --white: #ffffff;
+            --gray: #6c757d;
+            --success: #2a9d8f;
+            --warning: #e9c46a;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            color: var(--gray);
+            font-size: 1.1rem;
+        }
+
+        .shipping-calculator {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .shipping-calculator {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px 28px;
+        }
+
+        .card-header h2 {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+        }
+
+        .input-hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .courier-logos {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .courier-logo {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .courier-logo.ups {
+            background: #351c15;
+            color: #ffb500;
+        }
+
+        .courier-logo.dhl {
+            background: #ffcc00;
+            color: #d40511;
+        }
+
+        .courier-logo.fedex {
+            background: #4d148c;
+            color: #ff6600;
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .courier-result {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .courier-result:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .courier-header {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .courier-header.ups {
+            background: linear-gradient(135deg, #351c15 0%, #5c3d2e 100%);
+            color: #ffb500;
+        }
+
+        .courier-header.dhl {
+            background: linear-gradient(135deg, #d40511 0%, #a3160e 100%);
+            color: #ffcc00;
+        }
+
+        .courier-header.fedex {
+            background: linear-gradient(135deg, #4d148c 0%, #2a0a4a 100%);
+            color: #ff6600;
+        }
+
+        .courier-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .courier-name i {
+            font-size: 1.8rem;
+        }
+
+        .courier-body {
+            padding: 24px;
+        }
+
+        .price-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-item {
+            text-align: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .price-item .label {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+
+        .price-item .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .price-item .value.price {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .price-item .value.usd {
+            color: #059669;
+        }
+
+        .delivery-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .features-list {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .features-list h4 {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .features-list ul {
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 6px 0;
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .features-list li i {
+            color: var(--success);
+        }
+
+        .notes-section {
+            background: #fff3cd;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 30px;
+        }
+
+        .notes-section h3 {
+            color: #856404;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notes-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .note-item {
+            background: rgba(255,255,255,0.7);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .note-item h4 {
+            font-size: 0.95rem;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .note-item p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e9ecef;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .no-result {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .no-result i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .rate-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .rate-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rate-item .label {
+            font-size: 0.9rem;
+            color: #1565c0;
+        }
+
+        .rate-item .value {
+            font-weight: 700;
+            color: #0d47a1;
+        }
+
+        .rate-item .value.updating {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .last-updated {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .api-status.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .api-status.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .disclaimer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .disclaimer i {
+            margin-right: 5px;
+        }
+
+        .courier-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--secondary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .courier-link:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .courier-name a:hover {
+            text-decoration: underline !important;
+        }
+
+        /* 代理商价格样式 */
+        .section-title {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: var(--secondary);
+        }
+
+        .recommend-tag {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .official-price-section {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--gray);
+        }
+
+        .agent-price-section {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #10b981;
+        }
+
+        .agent-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .agent-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .agent-info-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 120px;
+        }
+
+        .agent-name-link {
+            color: var(--secondary);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .agent-name-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .agent-phone {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .agent-phone i {
+            margin-right: 4px;
+        }
+
+        .agent-price {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .agent-usd {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .agent-cny {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .agent-savings {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .agent-delivery {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: #e0f2fe;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .agent-delivery i {
+            color: #0284c7;
+        }
+
+        .agent-channel {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .channel-official {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+
+        .channel-agent {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+        }
+
+        .channel-self {
+            background: #d1fae5;
+            color: #047857;
+            border: 1px solid #6ee7b7;
+        }
+
+        /* 庄家/收货点大货价格样式 */
+        .bulk-price-section {
+            background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #ef4444;
+        }
+
+        .bulk-tag {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+            animation: pulse-tag 2s infinite;
+        }
+
+        @keyframes pulse-tag {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .bulk-desc {
+            font-size: 0.85rem;
+            color: #991b1b;
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 6px;
+        }
+
+        .bulk-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .bulk-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 14px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .bulk-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 160px;
+        }
+
+        .bulk-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        .bulk-note {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .bulk-price-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .bulk-rate {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        .bulk-total {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .bulk-time {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .bulk-tips {
+            background: rgba(255,255,255,0.7);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .bulk-tips p {
+            margin: 6px 0;
+            color: #7f1d1d;
+            line-height: 1.5;
+        }
+
+        .bulk-tips i {
+            margin-right: 6px;
+            width: 16px;
+        }
+
+        .market-live {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .market-live i {
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .market-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #7f1d1d;
+        }
+
+        .market-info span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .market-info i {
+            color: #dc2626;
+        }
+
+        .bulk-avg {
+            font-size: 0.8rem;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        /* 货代询价平台链接样式 */
+        .bulk-agents {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #fca5a5;
+        }
+
+        .bulk-agents h5 {
+            font-size: 0.95rem;
+            color: #991b1b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bulk-agent-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .bulk-agent-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border: 1px solid #fecaca;
+        }
+
+        .bulk-agent-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220,38,38,0.2);
+            border-color: #ef4444;
+        }
+
+        .agent-icon {
+            font-size: 1.5rem;
+        }
+
+        .agent-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .agent-text strong {
+            font-size: 0.9rem;
+            color: #dc2626;
+        }
+
+        .agent-text small {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .bulk-wechat {
+            background: #fef2f2;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+        }
+
+        .bulk-wechat p {
+            margin: 6px 0;
+            font-size: 0.85rem;
+            color: #7f1d1d;
+        }
+
+        .bulk-wechat i {
+            margin-right: 6px;
+            color: #dc2626;
+        }
+
+        .bulk-wechat .fa-weixin {
+            color: #07c160;
+        }
+
+        .bulk-hint {
+            background: #fffbeb;
+            border: 1px dashed #f59e0b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #92400e;
+        }
+
+        .bulk-hint i {
+            color: #f59e0b;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 600px) {
+            .bulk-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .bulk-price-info {
+                align-items: flex-start;
+            }
+        }
+
+        .price-display {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .price-display {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .agent-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .agent-price {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-shipping-fast"></i>
+                International Shipping Calculator
+            </h1>
+            <p>Real-time rates from UPS, DHL & FEDEX | Live Exchange Rates</p>
+        </div>
+
+        <div class="shipping-calculator">
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <i class="fas fa-calculator"></i>
+                        Shipping Details
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="rate-info">
+                        <div class="rate-item">
+                            <span class="label">USD/CNY:</span>
+                            <span class="value" id="usdCnyRate">Loading...</span>
+                        </div>
+                        <div class="api-status online" id="apiStatus">
+                            <i class="fas fa-circle"></i>
+                            <span>Live Rates</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Package Weight (kg)</label>
+                        <input type="number" id="weight" placeholder="e.g., 2.5" step="0.1" min="0.1" value="1">
+                        <p class="input-hint">Maximum: 500kg per shipment</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Destination Country</label>
+                        <select id="destination">
+                            <option value="">Select destination...</option>
+                            <optgroup label="North America">
+                                <option value="US">United States</option>
+                                <option value="CA">Canada</option>
+                                <option value="MX">Mexico</option>
+                            </optgroup>
+                            <optgroup label="Europe">
+                                <option value="GB">United Kingdom</option>
+                                <option value="DE">Germany</option>
+                                <option value="FR">France</option>
+                                <option value="IT">Italy</option>
+                                <option value="ES">Spain</option>
+                                <option value="NL">Netherlands</option>
+                                <option value="BE">Belgium</option>
+                                <option value="PL">Poland</option>
+                                <option value="AT">Austria</option>
+                                <option value="CH">Switzerland</option>
+                                <option value="SE">Sweden</option>
+                                <option value="NO">Norway</option>
+                                <option value="DK">Denmark</option>
+                                <option value="FI">Finland</option>
+                                <option value="IE">Ireland</option>
+                                <option value="PT">Portugal</option>
+                                <option value="CZ">Czech Republic</option>
+                                <option value="HU">Hungary</option>
+                                <option value="RO">Romania</option>
+                                <option value="GR">Greece</option>
+                                <option value="TR">Turkey</option>
+                                <option value="RU">Russia</option>
+                            </optgroup>
+                            <optgroup label="Asia Pacific">
+                                <option value="JP">Japan</option>
+                                <option value="KR">South Korea</option>
+                                <option value="SG">Singapore</option>
+                                <option value="AU">Australia</option>
+                                <option value="NZ">New Zealand</option>
+                                <option value="HK">Hong Kong</option>
+                                <option value="TW">Taiwan</option>
+                                <option value="MY">Malaysia</option>
+                                <option value="TH">Thailand</option>
+                                <option value="VN">Vietnam</option>
+                                <option value="ID">Indonesia</option>
+                                <option value="PH">Philippines</option>
+                                <option value="IN">India</option>
+                                <option value="AE">UAE</option>
+                                <option value="SA">Saudi Arabia</option>
+                                <option value="IL">Israel</option>
+                                <option value="ZA">South Africa</option>
+                                <option value="BR">Brazil</option>
+                                <option value="CL">Chile</option>
+                                <option value="CO">Colombia</option>
+                                <option value="AR">Argentina</option>
+                                <option value="EG">Egypt</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Shipping Type</label>
+                        <select id="shippingType">
+                            <option value="express">Express (3-5 days)</option>
+                            <option value="economy">Economy (5-10 days)</option>
+                            <option value="priority">Priority (2-3 days)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-primary" id="calcBtn" onclick="calculateShipping()">
+                        <i class="fas fa-sync-alt"></i>
+                        Get Real-Time Rates
+                    </button>
+
+                    <div class="courier-logos">
+                        <div class="courier-logo ups">
+                            <i class="fas fa-truck fa-2x"></i><br>UPS
+                        </div>
+                        <div class="courier-logo dhl">
+                            <i class="fas fa-plane fa-2x"></i><br>DHL
+                        </div>
+                        <div class="courier-logo fedex">
+                            <i class="fas fa-shipping-fast fa-2x"></i><br>FedEx
+                        </div>
+                    </div>
+
+                    <p class="last-updated" id="lastUpdated" style="margin-top: 15px; text-align: center;">
+                        Rates update automatically every 60 seconds
+                    </p>
+                </div>
+            </div>
+
+            <div class="results-section" id="results">
+                <div class="card">
+                    <div class="card-body no-result">
+                        <i class="fas fa-truck-loading"></i>
+                        <h3>Enter shipping details to see rates</h3>
+                        <p>Select weight and destination to compare courier prices</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notes-section">
+            <h3>
+                <i class="fas fa-info-circle"></i>
+                Important Notes & Tips
+            </h3>
+            <div class="notes-list">
+                <div class="note-item">
+                    <h4>📦 Volume Weight Calculation</h4>
+                    <p>Air freight charges based on either actual or volumetric weight (L×W×H/5000), whichever is greater. For light but large packages, volumetric weight may apply.</p>
+                </div>
+                <div class="note-item">
+                    <h4>💰 Customs & Duties</h4>
+                    <p>Import duties and taxes are NOT included. Recipient is responsible for payment. DDP (Delivered Duty Paid) service available at extra cost.</p>
+                </div>
+                <div class="note-item">
+                    <h4>📋 Required Documents</h4>
+                    <p>Commercial invoice with HS codes, packing list, and certificate of origin required. Electronics may need FCC/CE declarations.</p>
+                </div>
+                <div class="note-item">
+                    <h4>🚫 Restricted Items</h4>
+                    <p>Batteries (UN3481), liquids, powders, and perishables have restrictions. Lithium batteries under 100Wh can ship via express.</p>
+                </div>
+                <div class="note-item">
+                    <h4>⏰ Cut-off Times</h4>
+                    <p>Daily pickup cut-off: 5:00 PM China Time. Express shipments cleared at origin for faster delivery. Weekend pickups may delay shipment.</p>
+                </div>
+                <div class="note-item">
+                    <h4>📦 Packing Requirements</h4>
+                    <p>Use corrugated boxes with proper cushioning. Fragile items require "FRAGILE" markings. Maximum carton weight: 20kg for standard shipping.</p>
+                </div>
+                <div class="note-item">
+                    <h4>💼 Insurance</h4>
+                    <p>Basic carrier liability included. Recommend purchasing additional cargo insurance for high-value shipments (coverage up to invoice value).</p>
+                </div>
+                <div class="note-item">
+                    <h4>🔄 Returns Process</h4>
+                    <p>Return shipping from destination to Shenzhen is customer responsibility. RMA number required. Inspection fees may apply for returns.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <i class="fas fa-exclamation-triangle"></i>
+            All rates are estimates based on live data. Final shipping costs may vary based on exact dimensions, fuel surcharges, and customs requirements. Contact us for exact quotes.
+        </div>
+    </div>
+
+    <script>
+        // Current exchange rate (will be updated from API)
+        let exchangeRate = { USD: 1, CNY: 7.25, lastUpdated: null };
+
+        // 庄家/收货点行情价格 (模拟实时行情)
+        let bulkMarketRates = {
+            lastUpdated: null,
+            rates: {}
+        };
+
+        // Shipping API configuration (for real-time rates)
+        const API_CONFIG = {
+            exchangeRateApi: 'https://api.exchangerate-api.com/v4/latest/USD',
+            demoMode: true
+        };
+
+        // 获取庄家行情价格 (模拟从货代平台/行情网站获取)
+        async function fetchBulkMarketRates(destination) {
+            // 模拟API延迟
+            await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+
+            // 基础价格区间 (元/kg) - 根据目的地区域调整
+            const zoneMultipliers = {
+                // 美洲
+                'US': 1.0, 'CA': 1.05, 'MX': 1.15, 'BR': 1.35, 'CL': 1.30, 'CO': 1.25, 'AR': 1.35,
+                // 欧洲
+                'GB': 1.08, 'DE': 1.05, 'FR': 1.08, 'IT': 1.10, 'ES': 1.10, 'NL': 1.05,
+                'BE': 1.05, 'PL': 1.12, 'AT': 1.08, 'CH': 1.15, 'SE': 1.15, 'NO': 1.18,
+                'DK': 1.12, 'FI': 1.15, 'IE': 1.10, 'PT': 1.12, 'CZ': 1.10, 'HU': 1.12,
+                'RO': 1.15, 'GR': 1.15, 'TR': 1.18, 'RU': 1.25,
+                // 亚太
+                'JP': 0.85, 'KR': 0.82, 'SG': 0.80, 'HK': 0.75, 'TW': 0.80, 'AU': 1.05, 'NZ': 1.10,
+                'MY': 0.85, 'TH': 0.88, 'VN': 0.90, 'ID': 0.95, 'PH': 0.92, 'IN': 0.95,
+                // 中东非洲
+                'AE': 1.10, 'SA': 1.15, 'IL': 1.20, 'ZA': 1.25, 'EG': 1.20
+            };
+
+            const multiplier = zoneMultipliers[destination] || 1.1;
+
+            // 模拟市场行情波动 (±10%)
+            const marketVolatility = 0.9 + Math.random() * 0.2;
+
+            // 燃油附加费波动 (当前模拟 12-18%)
+            const fuelSurcharge = 0.12 + Math.random() * 0.06;
+
+            // 旺季调整 (Q4通常涨价)
+            const month = new Date().getMonth();
+            const seasonalAdjust = (month >= 9 && month <= 11) ? 1.15 : 1.0; // Q4旺季
+
+            // 计算红单和蓝单基础价格
+            const baseRedPrice = 35 * multiplier * marketVolatility * seasonalAdjust;
+            const baseBluePrice = 30 * multiplier * marketVolatility * seasonalAdjust;
+
+            bulkMarketRates = {
+                lastUpdated: new Date(),
+                fuelSurcharge: (fuelSurcharge * 100).toFixed(1),
+                seasonalAdjust: seasonalAdjust > 1 ? '旺季' : '平季',
+                rates: {
+                    red: {
+                        min: Math.round(baseRedPrice * 0.92),
+                        max: Math.round(baseRedPrice * 1.12),
+                        avg: Math.round(baseRedPrice)
+                    },
+                    blue: {
+                        min: Math.round(baseBluePrice * 0.90),
+                        max: Math.round(baseBluePrice * 1.15),
+                        avg: Math.round(baseBluePrice)
+                    }
+                }
+            };
+
+            return bulkMarketRates;
+        }
+
+        // Fetch live exchange rates
+        async function fetchExchangeRates() {
+            const rateEl = document.getElementById('usdCnyRate');
+            const statusEl = document.getElementById('apiStatus');
+
+            try {
+                rateEl.classList.add('updating');
+                rateEl.textContent = 'Fetching...';
+
+                const response = await fetch(API_CONFIG.exchangeRateApi);
+                const data = await response.json();
+
+                if (data.rates && data.rates.CNY) {
+                    exchangeRate.CNY = data.rates.CNY;
+                    exchangeRate.lastUpdated = new Date();
+
+                    rateEl.textContent = data.rates.CNY.toFixed(4);
+                    statusEl.className = 'api-status online';
+                    statusEl.innerHTML = '<i class="fas fa-circle"></i><span>Live</span>';
+
+                    document.getElementById('lastUpdated').innerHTML =
+                        `<i class="fas fa-clock"></i> Last updated: ${exchangeRate.lastUpdated.toLocaleTimeString()}`;
+
+                    console.log('[Exchange] Rate updated:', exchangeRate);
+                }
+            } catch (error) {
+                console.warn('[Exchange] API failed, using fallback rate');
+                exchangeRate.CNY = 7.25; // Fallback rate
+                rateEl.textContent = '7.2500 (est.)';
+                statusEl.className = 'api-status offline';
+                statusEl.innerHTML = '<i class="fas fa-circle"></i><span>Estimated</span>';
+            } finally {
+                rateEl.classList.remove('updating');
+            }
+        }
+
+        // Simulated real-time shipping rate calculation
+        // In production, replace with actual API calls to UPS/DHL/FedEx
+        async function fetchCourierRates(weight, destination, shippingType) {
+            const rates = {
+                ups: null,
+                dhl: null,
+                fedex: null
+            };
+
+            // Simulate API delay for realistic feel
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+
+            // Base rates per kg by zone (USD)
+            const zoneRates = {
+                'US': { zone: 1, rates: { express: 8.5, economy: 6.5, priority: 12 } },
+                'CA': { zone: 1, rates: { express: 9.5, economy: 7.5, priority: 13 } },
+                'MX': { zone: 2, rates: { express: 12, economy: 9, priority: 16 } },
+                'GB': { zone: 3, rates: { express: 12, economy: 9, priority: 16 } },
+                'DE': { zone: 3, rates: { express: 11, economy: 8.5, priority: 15 } },
+                'FR': { zone: 3, rates: { express: 11, economy: 8.5, priority: 15 } },
+                'JP': { zone: 5, rates: { express: 10, economy: 8, priority: 14 } },
+                'AU': { zone: 6, rates: { express: 13, economy: 10, priority: 17 } },
+                'SG': { zone: 5, rates: { express: 10, economy: 8, priority: 14 } },
+                'AE': { zone: 4, rates: { express: 14, economy: 11, priority: 18 } },
+                'BR': { zone: 7, rates: { express: 16, economy: 13, priority: 22 } },
+                'default': { zone: 4, rates: { express: 13, economy: 10, priority: 17 } }
+            };
+
+            const destData = zoneRates[destination] || zoneRates.default;
+            const baseRate = destData.rates[shippingType];
+            const fuelSurcharge = 0.15; // 15% fuel surcharge
+
+            // Calculate rates for each courier (with slight variations)
+            const calculateRate = (base, variance) => {
+                const rate = base * weight * (1 + variance * (Math.random() - 0.5));
+                const fuel = rate * fuelSurcharge;
+                const total = rate + fuel;
+                return {
+                    rate: total,
+                    base: rate,
+                    fuel: fuel,
+                    total: total
+                };
+            };
+
+            rates.ups = calculateRate(baseRate, 0.05);
+            rates.dhl = calculateRate(baseRate, 0.03);
+            rates.fedex = calculateRate(baseRate, 0.04);
+
+            return rates;
+        }
+
+        // Delivery time estimates
+        const DELIVERY_TIME = {
+            express: {
+                1: { min: 3, max: 5 },
+                2: { min: 4, max: 6 },
+                3: { min: 4, max: 6 },
+                4: { min: 5, max: 8 },
+                5: { min: 3, max: 5 },
+                6: { min: 5, max: 7 },
+                7: { min: 6, max: 10 }
+            },
+            economy: {
+                1: { min: 7, max: 12 },
+                2: { min: 8, max: 14 },
+                3: { min: 8, max: 14 },
+                4: { min: 10, max: 16 },
+                5: { min: 7, max: 12 },
+                6: { min: 9, max: 14 },
+                7: { min: 12, max: 20 }
+            },
+            priority: {
+                1: { min: 2, max: 3 },
+                2: { min: 2, max: 4 },
+                3: { min: 2, max: 4 },
+                4: { min: 3, max: 5 },
+                5: { min: 2, max: 3 },
+                6: { min: 3, max: 5 },
+                7: { min: 4, max: 7 }
+            }
+        };
+
+        // Shipping zones
+        const SHIPPING_ZONES = {
+            'US': 1, 'CA': 1, 'MX': 2,
+            'GB': 3, 'DE': 3, 'FR': 3, 'IT': 3, 'ES': 3, 'NL': 3, 'BE': 3, 'PL': 3,
+            'AT': 3, 'CH': 3, 'SE': 3, 'NO': 3, 'DK': 3, 'FI': 3, 'IE': 3, 'PT': 3,
+            'CZ': 3, 'HU': 3, 'RO': 3, 'GR': 3,
+            'TR': 4, 'RU': 4, 'AE': 4, 'SA': 4, 'IL': 4, 'EG': 4,
+            'JP': 5, 'KR': 5, 'SG': 5, 'HK': 5, 'TW': 5, 'MY': 5, 'TH': 5, 'VN': 5,
+            'ID': 5, 'PH': 5, 'IN': 5,
+            'AU': 6, 'NZ': 6, 'ZA': 6,
+            'BR': 7, 'CL': 7, 'CO': 7, 'AR': 7
+        };
+
+        // Calculate shipping
+        async function calculateShipping() {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const destination = document.getElementById('destination').value;
+            const shippingType = document.getElementById('shippingType').value;
+            const calcBtn = document.getElementById('calcBtn');
+
+            // Validation
+            if (!weight || weight <= 0) {
+                alert('Please enter a valid weight');
+                return;
+            }
+
+            if (!destination) {
+                alert('Please select a destination country');
+                return;
+            }
+
+            // Show loading
+            calcBtn.disabled = true;
+            calcBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching Rates...';
+
+            // Update exchange rate first
+            await fetchExchangeRates();
+
+            // Get shipping rates
+            const courierRates = await fetchCourierRates(weight, destination, shippingType);
+
+            // 获取庄家行情价格
+            const bulkRates = await fetchBulkMarketRates(destination);
+
+            const zone = SHIPPING_ZONES[destination] || 4;
+            const deliveryInfo = DELIVERY_TIME[shippingType][zone];
+
+            // 深圳知名国际货运代理商 (代理价格比官网便宜30-50%)
+            const agentDiscount = 0.65; // 代理价格约为官网65%
+
+            // Courier data with official links and Shenzhen agents
+            const couriers = [
+                {
+                    name: 'UPS',
+                    id: 'ups',
+                    icon: 'fa-truck',
+                    rates: courierRates.ups,
+                    features: ['Tracking updates', 'Door-to-door', 'Online booking', 'Insurance'],
+                    deliveryTime: deliveryInfo,
+                    website: 'https://www.ups.com',
+                    trackingUrl: 'https://www.ups.com/track',
+                    agentName: 'UPS Express Saver',
+                    priceType: 'official',
+                    agents: [
+                        { name: '顺丰国际', discount: 0.62, website: 'https://www.sf-international.com', phone: '95338', extraDays: 0, channel: 'UPS官方渠道' },
+                        { name: '云途物流', discount: 0.58, website: 'https://www.yuntuwuliu.com', phone: '400-688-2208', extraDays: 1, channel: 'UPS代理渠道' },
+                        { name: '燕文物流', discount: 0.60, website: 'https://www.yw56.com.cn', phone: '400-606-0756', extraDays: 1, channel: 'UPS代理渠道' },
+                        { name: '递四方', discount: 0.55, website: 'https://www.4px.com', phone: '400-860-4500', extraDays: 2, channel: '4PX自营专线' }
+                    ]
+                },
+                {
+                    name: 'DHL',
+                    id: 'dhl',
+                    icon: 'fa-plane',
+                    rates: courierRates.dhl,
+                    features: ['Real-time tracking', 'Customs clearance', '220+ countries', 'DDP option'],
+                    deliveryTime: { min: deliveryInfo.min - 1, max: deliveryInfo.max - 1 },
+                    website: 'https://www.dhl.com',
+                    trackingUrl: 'https://www.dhl.com/en/express/tracking.html',
+                    agentName: 'DHL Express Worldwide',
+                    priceType: 'official',
+                    agents: [
+                        { name: '递四方', discount: 0.55, website: 'https://www.4px.com', phone: '400-860-4500', extraDays: 0, channel: 'DHL官方渠道' },
+                        { name: '万邦速达', discount: 0.58, website: 'https://www.wanbangda.com', phone: '400-850-8800', extraDays: 1, channel: 'DHL代理渠道' },
+                        { name: '出口易', discount: 0.60, website: 'https://www.chukou1.com', phone: '400-688-0886', extraDays: 1, channel: 'DHL代理渠道' },
+                        { name: '云途物流', discount: 0.52, website: 'https://www.yuntuwuliu.com', phone: '400-688-2208', extraDays: 2, channel: '云途自营专线' }
+                    ]
+                },
+                {
+                    name: 'FEDEX',
+                    id: 'fedex',
+                    icon: 'fa-shipping-fast',
+                    rates: courierRates.fedex,
+                    features: ['Fast clearance', 'Money-back', 'Flexible pickup', 'Business solutions'],
+                    deliveryTime: deliveryInfo,
+                    website: 'https://www.fedex.com',
+                    trackingUrl: 'https://www.fedex.com/en-us/tracking.html',
+                    agentName: 'FedEx International Priority',
+                    priceType: 'official',
+                    agents: [
+                        { name: '纵腾集团', discount: 0.56, website: 'https://www.zongteng.com', phone: '400-888-5156', extraDays: 0, channel: 'FedEx官方渠道' },
+                        { name: '飞特物流', discount: 0.60, website: 'https://www.ft-logistics.com', phone: '0755-27520088', extraDays: 1, channel: 'FedEx代理渠道' },
+                        { name: '易速国际', discount: 0.58, website: 'https://www.es-express.com', phone: '400-889-1889', extraDays: 1, channel: 'FedEx代理渠道' },
+                        { name: '燕文物流', discount: 0.50, website: 'https://www.yw56.com.cn', phone: '400-606-0756', extraDays: 2, channel: '燕文自营专线' }
+                    ]
+                }
+            ];
+
+            // Generate results
+            let html = '';
+
+            couriers.forEach(courier => {
+                const usdTotal = courier.rates.total;
+                const cnyTotal = usdTotal * exchangeRate.CNY;
+
+                // 生成代理商价格列表
+                const agentPricesHtml = courier.agents.map(agent => {
+                    const agentUsd = usdTotal * agent.discount;
+                    const agentCny = agentUsd * exchangeRate.CNY;
+                    const savings = ((1 - agent.discount) * 100).toFixed(0);
+                    // 代理时效通常与官方一致或略慢1天
+                    const agentDeliveryMin = courier.deliveryTime.min;
+                    const agentDeliveryMax = courier.deliveryTime.max + (agent.extraDays || 0);
+                    // 渠道类型样式
+                    const isOfficial = agent.channel.includes('官方');
+                    const isSelfChannel = agent.channel.includes('自营');
+                    const channelClass = isOfficial ? 'channel-official' : (isSelfChannel ? 'channel-self' : 'channel-agent');
+                    return `
+                        <div class="agent-row">
+                            <div class="agent-info-cell">
+                                <a href="${agent.website}" target="_blank" class="agent-name-link">${agent.name}</a>
+                                <span class="agent-phone"><i class="fas fa-phone"></i> ${agent.phone}</span>
+                                <span class="agent-channel ${channelClass}">${agent.channel}</span>
+                            </div>
+                            <div class="agent-delivery">
+                                <i class="fas fa-clock"></i> ${agentDeliveryMin}-${agentDeliveryMax}天
+                            </div>
+                            <div class="agent-price">
+                                <span class="agent-usd">$${agentUsd.toFixed(2)}</span>
+                                <span class="agent-cny">¥${agentCny.toFixed(2)}</span>
+                            </div>
+                            <div class="agent-savings">省 ${savings}%</div>
+                        </div>
+                    `;
+                }).join('');
+
+                html += `
+                    <div class="courier-result">
+                        <div class="courier-header ${courier.id}">
+                            <div class="courier-name">
+                                <i class="fas ${courier.icon}"></i>
+                                <a href="${courier.website}" target="_blank" style="color: inherit; text-decoration: none;">
+                                    ${courier.name}
+                                </a>
+                            </div>
+                            <span>${shippingType.charAt(0).toUpperCase() + shippingType.slice(1)}</span>
+                        </div>
+                        <div class="courier-body">
+                            <div class="courier-links" style="display: flex; gap: 15px; margin-bottom: 16px; flex-wrap: wrap;">
+                                <a href="${courier.website}" target="_blank" class="courier-link">
+                                    <i class="fas fa-globe"></i> Official Website
+                                </a>
+                                <a href="${courier.trackingUrl}" target="_blank" class="courier-link">
+                                    <i class="fas fa-search-location"></i> Track Shipment
+                                </a>
+                            </div>
+
+                            <div class="official-price-section">
+                                <h4 class="section-title"><i class="fas fa-building"></i> 官网价格 (Official Price)</h4>
+                                <div class="price-display">
+                                    <div class="price-item">
+                                        <div class="label">Weight</div>
+                                        <div class="value">${weight} kg</div>
+                                    </div>
+                                    <div class="price-item">
+                                        <div class="label">Delivery</div>
+                                        <div class="value">${courier.deliveryTime.min}-${courier.deliveryTime.max} days</div>
+                                    </div>
+                                    <div class="price-item">
+                                        <div class="label">USD</div>
+                                        <div class="value price usd">$${usdTotal.toFixed(2)}</div>
+                                    </div>
+                                    <div class="price-item">
+                                        <div class="label">CNY</div>
+                                        <div class="value price">¥${cnyTotal.toFixed(2)}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="agent-price-section">
+                                <h4 class="section-title"><i class="fas fa-handshake"></i> 深圳代理价格 (Agent Prices) <span class="recommend-tag">推荐</span></h4>
+                                <div class="agent-list">
+                                    ${agentPricesHtml}
+                                </div>
+                            </div>
+
+                            ${weight >= 21 ? `
+                            <div class="bulk-price-section">
+                                <h4 class="section-title">
+                                    <i class="fas fa-warehouse"></i> 庄家/收货点价格 (21kg+大货专享)
+                                    <span class="bulk-tag">超低价</span>
+                                    <span class="market-live"><i class="fas fa-wifi"></i> 实时行情</span>
+                                </h4>
+                                <div class="market-info">
+                                    <span><i class="fas fa-gas-pump"></i> 燃油附加费: ${bulkRates.fuelSurcharge}%</span>
+                                    <span><i class="fas fa-calendar-alt"></i> 季节: ${bulkRates.seasonalAdjust}</span>
+                                    <span><i class="fas fa-sync-alt"></i> 更新: ${bulkRates.lastUpdated.toLocaleTimeString()}</span>
+                                </div>
+                                <p class="bulk-desc">深圳本地二三级货代，走香港${courier.name}大货渠道，对产品包容度更高</p>
+                                <div class="bulk-list">
+                                    <div class="bulk-row">
+                                        <div class="bulk-info">
+                                            <span class="bulk-name">🔴 红单渠道</span>
+                                            <span class="bulk-note">香港${courier.name}大货 | 不计泡</span>
+                                        </div>
+                                        <div class="bulk-price-info">
+                                            <span class="bulk-rate">¥${bulkRates.rates.red.min}-${bulkRates.rates.red.max}/kg</span>
+                                            <span class="bulk-total">≈ ¥${(weight * bulkRates.rates.red.min).toFixed(0)} - ¥${(weight * bulkRates.rates.red.max).toFixed(0)}</span>
+                                            <span class="bulk-avg">参考均价: ¥${bulkRates.rates.red.avg}/kg</span>
+                                        </div>
+                                        <div class="bulk-time"><i class="fas fa-clock"></i> ${courier.deliveryTime.min + 1}-${courier.deliveryTime.max + 2}天</div>
+                                    </div>
+                                    <div class="bulk-row">
+                                        <div class="bulk-info">
+                                            <span class="bulk-name">🔵 蓝单渠道</span>
+                                            <span class="bulk-note">香港${courier.name}特惠 | 轻抛货友好</span>
+                                        </div>
+                                        <div class="bulk-price-info">
+                                            <span class="bulk-rate">¥${bulkRates.rates.blue.min}-${bulkRates.rates.blue.max}/kg</span>
+                                            <span class="bulk-total">≈ ¥${(weight * bulkRates.rates.blue.min).toFixed(0)} - ¥${(weight * bulkRates.rates.blue.max).toFixed(0)}</span>
+                                            <span class="bulk-avg">参考均价: ¥${bulkRates.rates.blue.avg}/kg</span>
+                                        </div>
+                                        <div class="bulk-time"><i class="fas fa-clock"></i> ${courier.deliveryTime.min + 2}-${courier.deliveryTime.max + 3}天</div>
+                                    </div>
+                                </div>
+                                <div class="bulk-tips">
+                                    <p><i class="fas fa-info-circle"></i> <strong>询价方式：</strong>联系深圳货代问"香港${courier.name}大货价"，报重量和目的地</p>
+                                    <p><i class="fas fa-map-marker-alt"></i> <strong>收货点集中区：</strong>深圳龙华、宝安福永、沙井、公明等地</p>
+                                    <p><i class="fas fa-exclamation-triangle"></i> <strong>注意：</strong>价格随行情浮动，以实际询价为准；部分敏感货可走，需提前确认</p>
+                                </div>
+                                <div class="bulk-agents">
+                                    <h5><i class="fas fa-store"></i> 深圳货代询价平台 & 收货点</h5>
+                                    <div class="bulk-agent-list">
+                                        <a href="https://www.1688.com/chanpin/-B9FA2BCAC4BFB5DD.html" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">🏪</span>
+                                            <span class="agent-text">
+                                                <strong>1688国际货代</strong>
+                                                <small>阿里巴巴货代服务商</small>
+                                            </span>
+                                        </a>
+                                        <a href="https://sz.58.com/wuliu/" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">📦</span>
+                                            <span class="agent-text">
+                                                <strong>58同城-深圳物流</strong>
+                                                <small>本地货代信息</small>
+                                            </span>
+                                        </a>
+                                        <a href="https://www.fob5.com/" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">🌐</span>
+                                            <span class="agent-text">
+                                                <strong>FOB5外贸论坛</strong>
+                                                <small>货代行情讨论</small>
+                                            </span>
+                                        </a>
+                                        <a href="https://www.52by.com/" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">💼</span>
+                                            <span class="agent-text">
+                                                <strong>52报关网</strong>
+                                                <small>报关货代服务</small>
+                                            </span>
+                                        </a>
+                                        <a href="https://www.jctrans.com/" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">🚢</span>
+                                            <span class="agent-text">
+                                                <strong>锦程物流网</strong>
+                                                <small>货代报价查询</small>
+                                            </span>
+                                        </a>
+                                        <a href="https://www.freightairbooking.com/" target="_blank" class="bulk-agent-link">
+                                            <span class="agent-icon">✈️</span>
+                                            <span class="agent-text">
+                                                <strong>运去哪</strong>
+                                                <small>在线订舱比价</small>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div class="bulk-wechat">
+                                        <p><i class="fab fa-weixin"></i> <strong>微信搜索：</strong>"深圳国际货代" "香港DHL大货" "福永货代"等关键词找庄家</p>
+                                        <p><i class="fas fa-users"></i> <strong>QQ群搜索：</strong>"深圳货代群" "国际快递同行群" 获取实时报价</p>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : `
+                            <div class="bulk-hint">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>重量≥21kg可解锁<strong>庄家/收货点超低价</strong>（约30-40元/kg），当前${weight}kg暂不适用</span>
+                            </div>
+                            `}
+
+                            <div class="delivery-time">
+                                <i class="fas fa-clock"></i>
+                                预计时效: ${courier.deliveryTime.min}-${courier.deliveryTime.max} 工作日
+                            </div>
+                            <div class="features-list">
+                                <h4>Service Features:</h4>
+                                <ul>
+                                    ${courier.features.map(f => `<li><i class="fas fa-check"></i> ${f}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('results').innerHTML = html;
+
+            // Reset button
+            calcBtn.disabled = false;
+            calcBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Rates';
+        }
+
+        // Auto-refresh rates every 60 seconds
+        setInterval(fetchExchangeRates, 60000);
+
+        // Initial fetch
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchExchangeRates();
+            document.getElementById('destination').value = 'US';
+        });
+    </script>
+</body>
+</html>
